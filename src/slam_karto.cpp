@@ -48,8 +48,13 @@
 
 // compute linear index for given map coords
 #define MAP_IDX(sx, i, j) ((sx) * (j) + (i))
+// #define DEBUG_BY_LOOP_LISTENER
 
+#ifdef DEBUG_BY_LOOP_LISTENER
+class SlamKarto : public karto::MapperLoopClosureListener
+#else
 class SlamKarto
+#endif
 {
   public:
     SlamKarto();
@@ -100,6 +105,11 @@ class SlamKarto
     SpaSolver* solver_;
     std::map<std::string, karto::LaserRangeFinder*> lasers_;
     std::map<std::string, bool> lasers_inverted_;
+#ifdef DEBUG_BY_LOOP_LISTENER
+    virtual void LoopClosureCheck(const std::string& /*rInfo*/);
+    virtual void BeginLoopClosure(const std::string& /*rInfo*/);
+    virtual void EndLoopClosure(const std::string& /*rInfo*/);
+#endif
 
     // Internal state
     bool got_map_;
@@ -159,7 +169,9 @@ SlamKarto::SlamKarto() :
   // Initialize Karto structures
   mapper_ = new karto::Mapper();
   dataset_ = new karto::Dataset();
-
+#ifdef DEBUG_BY_LOOP_LISTENER
+  mapper_->AddListener((MapperListener*)this);
+#endif
   // Setting General Parameters from the Parameter Server
   bool use_scan_matching;
   if(private_nh_.getParam("use_scan_matching", use_scan_matching))
@@ -716,6 +728,26 @@ SlamKarto::mapCallback(nav_msgs::GetMap::Request  &req,
   else
     return false;
 }
+
+#ifdef DEBUG_BY_LOOP_LISTENER
+void SlamKarto::LoopClosureCheck(const std::string& rInfo) {
+  std::cout << rInfo << endl;
+}
+
+/**
+* Called when loop closure is starting
+ */
+void SlamKarto::BeginLoopClosure(const std::string& rInfo) {
+  std::cout << rInfo << endl;
+}
+
+/**
+ * Called when loop closure is over
+ */
+void SlamKarto::EndLoopClosure(const std::string& rInfo) {
+  std::cout << rInfo << endl;
+}
+#endif
 
 int
 main(int argc, char** argv)
