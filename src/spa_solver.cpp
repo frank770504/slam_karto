@@ -47,7 +47,7 @@ void SpaSolver::Compute()
   typedef std::vector<sba::Node2d, Eigen::aligned_allocator<sba::Node2d> > NodeVector;
 
   ROS_INFO("Calling doSPA for loop closure");
-  m_Spa.doSPA(40);
+  m_Spa.doSPA(40, 1.0e-4, 3);
   ROS_INFO("Finished doSPA for loop closure");
   NodeVector nodes = m_Spa.getNodes();
   forEach(NodeVector, &nodes)
